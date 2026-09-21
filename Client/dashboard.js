@@ -286,6 +286,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Unlock Web Audio on first user interaction
     document.addEventListener('click', () => { initAudioContext(); }, { once: true });
 
+    // Close modals on overlay backdrop click
+    window.addEventListener('click', (e) => {
+        const bookingModal = document.getElementById('bookingModal');
+        const bpModal = document.getElementById('boardingPassModal');
+        if (e.target === bookingModal) {
+            closeBookingModal();
+        }
+        if (e.target === bpModal) {
+            closeBoardingPassModal();
+        }
+    });
+
+    // Close modals on Escape key
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeBookingModal();
+            closeBoardingPassModal();
+        }
+    });
+
     // Load Flights & User Bookings concurrently
     await Promise.all([fetchFlights(), fetchMyBookings()]);
 });
@@ -775,7 +795,12 @@ function openBookingModal(flightId) {
     pickSeat('6A', 'Economy', 0, false);
 
     const modal = document.getElementById('bookingModal');
-    if (modal) modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        const modalBody = modal.querySelector('.modal-body');
+        if (modalBody) modalBody.scrollTop = 0;
+        modal.scrollTop = 0;
+    }
 }
 
 function closeBookingModal() {
@@ -1053,13 +1078,22 @@ function openBoardingPassById(bookingId) {
     if (fDest) fDest.innerText = booking.Destination || 'Destination';
     if (fClass) fClass.innerText = booking.FlightClass || 'Economy';
     if (fDate) {
-        fDate.innerText = new Date(booking.DepartureTime).toLocaleString([], {
-            dateStyle: 'medium', timeStyle: 'short'
-        });
+        try {
+            fDate.innerText = booking.DepartureTime ? new Date(booking.DepartureTime).toLocaleString([], {
+                dateStyle: 'medium', timeStyle: 'short'
+            }) : 'Scheduled Today';
+        } catch (e) {
+            fDate.innerText = 'Scheduled Today';
+        }
     }
-    if (fSeat) fSeat.innerText = booking.SeatNumber || currentAssignedSeat || '6A';
+    if (fSeat) fSeat.innerText = booking.SeatNumber || currentAssignedSeat || '14A';
 
     modal.classList.add('active');
+
+    // Ensure ticket body and modal overlay are scrolled to top
+    const ticketBody = modal.querySelector('.ticket-body');
+    if (ticketBody) ticketBody.scrollTop = 0;
+    modal.scrollTop = 0;
 
     // Play Authentic In-Flight Boarding Chime
     playCabinChime();
@@ -1091,17 +1125,29 @@ function closeBoardingPassModal() {
 
 // Live Countdown Timer to Departure
 function startCountdown(departureTimeStr) {
-    if (countdownIntervalId) clearInterval(countdownIntervalId);
+    if (countdownIntervalId) {
+        clearInterval(countdownIntervalId);
+        countdownIntervalId = null;
+    }
 
     const countdownEl = document.getElementById('bpCountdownText');
-    const targetDate = new Date(departureTimeStr).getTime();
+    if (!countdownEl) return;
+
+    let targetDate = departureTimeStr ? new Date(departureTimeStr).getTime() : NaN;
+    if (isNaN(targetDate)) {
+        targetDate = Date.now() + (3 * 3600 * 1000);
+    }
 
     const update = () => {
-        const now = new Date().getTime();
+        const now = Date.now();
         const diff = targetDate - now;
 
         if (diff <= 0) {
-            if (countdownEl) countdownEl.innerText = 'Boarding: Now Open at Gate';
+            countdownEl.innerText = 'Boarding: Now Open at Gate';
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+                countdownIntervalId = null;
+            }
             return;
         }
 
@@ -1110,9 +1156,7 @@ function startCountdown(departureTimeStr) {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        if (countdownEl) {
-            countdownEl.innerText = `Boarding in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
+        countdownEl.innerText = `Boarding in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
     };
 
     update();
