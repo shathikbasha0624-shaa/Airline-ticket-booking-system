@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWings Airlines | Passenger Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+</head>
+<body>
+    <div id="toastContainer"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="app-navbar">
+        <a href="dashboard.html" class="app-brand">
+            <span>✈️</span> SkyWings <span class="app-brand-badge">Passenger</span>
+        </a>
+
+        <div class="nav-links">
+            <button class="nav-link-btn active" id="navExploreBtn" onclick="scrollToSection('flightsSection')">
+                🔍 Explore Flights
+            </button>
+            <button class="nav-link-btn" id="navBookingsBtn" onclick="scrollToSection('bookingsSection')">
+                🎫 My Bookings (<span id="myBookingsCountBadge">0</span>)
+            </button>
+        </div>
+
+        <div class="nav-user-actions">
+            <div class="user-profile-badge">
+                <div class="user-avatar" id="userAvatarLetter">U</div>
+                <div class="user-details">
+                    <span class="user-name-text" id="userNameText">Passenger</span>
+                    <span class="user-role-badge">Customer</span>
+                </div>
+            </div>
+            <button onclick="logoutUser()" class="btn-logout-nav" title="Sign out of account">
+                🚪 Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-wrapper">
+        <!-- Hero Banner -->
+        <div class="dashboard-hero-banner">
+            <div class="hero-banner-text">
+                <h1>Where Will You Fly Next? 🌍</h1>
+                <p>Select your flight, personalize your travel class, and download your instant boarding pass.</p>
+            </div>
+            <div class="hero-banner-quick-action">
+                <button class="btn btn-accent" onclick="scrollToSection('flightsSection')">
+                    Browse Flights
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Indicators -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-icon-box blue">🛫</div>
+                <div>
+                    <div class="metric-label">Available Routes</div>
+                    <div class="metric-value" id="metricTotalFlights">--</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon-box green">🎫</div>
+                <div>
+                    <div class="metric-label">Confirmed Trips</div>
+                    <div class="metric-value" id="metricConfirmedTrips">0</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon-box amber">💳</div>
+                <div>
+                    <div class="metric-label">Total Travel Spent</div>
+                    <div class="metric-value" id="metricTotalSpent">$0.00</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon-box purple">⭐</div>
+                <div>
+                    <div class="metric-label">Membership Tier</div>
+                    <div class="metric-value">SkyGold Club</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Console -->
+        <div class="search-filter-card">
+            <div class="search-filter-grid">
+                <div class="filter-item">
+                    <label for="searchQuery">Search Route or Airport</label>
+                    <div class="filter-input-wrapper">
+                        <span class="filter-icon">🔍</span>
+                        <input type="text" id="searchQuery" class="filter-input" placeholder="e.g. London, New York, Tokyo..." oninput="handleFilterChange()">
+                    </div>
+                </div>
+
+                <div class="filter-item">
+                    <label for="sortBySelect">Sort Schedule By</label>
+                    <select id="sortBySelect" class="filter-input" onchange="handleFilterChange()" style="padding-left: 14px;">
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="date-asc">Departure: Earliest First</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label for="classFilter">Preferred Class</label>
+                    <select id="classFilter" class="filter-input" onchange="handleFilterChange()" style="padding-left: 14px;">
+                        <option value="all">All Classes Available</option>
+                        <option value="Economy">Economy Preview</option>
+                        <option value="Business">Business Preview</option>
+                        <option value="First Class">First Class Preview</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flights Grid Section -->
+        <section id="flightsSection">
+            <div class="section-header">
+                <h2>🛫 Scheduled Departures</h2>
+                <span style="font-size: 13px; color: var(--text-muted);" id="flightsMatchCount">Showing flights</span>
+            </div>
+
+            <div id="flightsGrid" class="flights-grid">
+                <!-- Flight cards rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- Passenger Bookings Section -->
+        <section id="bookingsSection" style="margin-top: 48px;">
+            <div class="section-header">
+                <h2>🎫 My Trips & Boarding Passes</h2>
+                <span style="font-size: 13px; color: var(--text-muted);">Real-time booking confirmations from MSSQL database</span>
+            </div>
+
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Flight No.</th>
+                                <th>Route & Schedule</th>
+                                <th>Class Tier</th>
+                                <th>Total Paid</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Boarding & Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <!-- Bookings rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- =========================================================
+         INTERACTIVE MULTI-CLASS BOOKING MODAL
+         ========================================================= -->
+    <div id="bookingModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h3 id="modalFlightNumber">Confirm Flight Reservation</h3>
+                    <p id="modalRouteSummary">New York (JFK) ➔ London (LHR)</p>
+                </div>
+                <button class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Quick Route Pill -->
+                <div class="modal-flight-summary">
+                    <div class="modal-summary-item">
+                        <div class="label">Flight Date</div>
+                        <div class="value" id="modalFlightDate">--</div>
+                    </div>
+                    <div class="modal-summary-item">
+                        <div class="label">Aircraft</div>
+                        <div class="value">Boeing 787 Dreamliner</div>
+                    </div>
+                    <div class="modal-summary-item">
+                        <div class="label">Assigned Seat</div>
+                        <div class="value" id="modalAssignedSeat">14A</div>
+                    </div>
+                </div>
+
+                <!-- Class Tier Selector -->
+                <div class="class-tiers-label">
+                    <span>1. Choose Travel Experience:</span>
+                    <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Tap a tier to calculate fare</span>
+                </div>
+
+                <div class="tier-cards-container">
+                    <!-- Economy -->
+                    <div class="tier-card selected" id="tierCardEconomy" onclick="selectClassTier('Economy', 1)">
+                        <div>
+                            <span class="tier-badge economy">Standard</span>
+                            <div class="tier-name">Economy</div>
+                            <div class="tier-multiplier-text">1.0x Base Rate</div>
+                        </div>
+                        <ul class="tier-features">
+                            <li>23kg Check-in Bag</li>
+                            <li>Complimentary Meal</li>
+                            <li>Standard Legroom</li>
+                        </ul>
+                    </div>
+
+                    <!-- Business -->
+                    <div class="tier-card" id="tierCardBusiness" onclick="selectClassTier('Business', 2)">
+                        <div>
+                            <span class="tier-badge business">Premium</span>
+                            <div class="tier-name">Business</div>
+                            <div class="tier-multiplier-text">2.0x Base Rate</div>
+                        </div>
+                        <ul class="tier-features">
+                            <li>Priority Boarding</li>
+                            <li>Airport Lounge Access</li>
+                            <li>Extra Recline Seats</li>
+                        </ul>
+                    </div>
+
+                    <!-- First Class -->
+                    <div class="tier-card" id="tierCardFirst" onclick="selectClassTier('First Class', 3)">
+                        <div>
+                            <span class="tier-badge first">Luxury VIP</span>
+                            <div class="tier-name">First Class</div>
+                            <div class="tier-multiplier-text">3.0x Base Rate</div>
+                        </div>
+                        <ul class="tier-features">
+                            <li>Private Lie-flat Suite</li>
+                            <li>Fine Dining & Champagne</li>
+                            <li>Dedicated Chauffeur</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Live Fare Calculation -->
+                <div class="modal-breakdown-box">
+                    <div class="breakdown-row">
+                        <span>Base Airfare:</span>
+                        <span id="calcBaseFare">$0.00</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Class Surcharge (<span id="calcClassLabel">Economy</span>):</span>
+                        <span id="calcClassSurcharge">$0.00</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Aviation Security & Taxes:</span>
+                        <span>$35.00</span>
+                    </div>
+                    <div class="breakdown-row total">
+                        <span>Total Payable Amount:</span>
+                        <span id="calcTotalFare">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeBookingModal()" style="flex: 0.4;">Cancel</button>
+                    <button type="button" class="btn-confirm-booking" id="confirmBookingBtn" onclick="processFlightBooking()">
+                        <span>💳 Reserve & Pay Now</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         REALISTIC BOARDING PASS MODAL
+         ========================================================= -->
+    <div id="boardingPassModal" class="modal-overlay">
+        <div class="ticket-modal-card">
+            <div class="ticket-header">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                        <span>✈️</span> SkyWings Boarding Pass
+                    </h3>
+                    <p style="font-size: 12px; color: #93c5fd;">Electronic Passenger Boarding Document</p>
+                </div>
+                <button class="modal-close-btn" onclick="closeBoardingPassModal()">&times;</button>
+            </div>
+
+            <div class="ticket-body">
+                <div class="ticket-flight-row">
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Passenger Name</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--text-primary);" id="bpPassengerName">John Doe</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Flight Number</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--primary);" id="bpFlightNumber">SW-101</div>
+                    </div>
+                </div>
+
+                <div class="ticket-grid-info">
+                    <div class="ticket-data-item">
+                        <div class="t-label">From (Origin)</div>
+                        <div class="t-val" id="bpOrigin">JFK</div>
+                    </div>
+                    <div class="ticket-data-item">
+                        <div class="t-label">To (Destination)</div>
+                        <div class="t-val" id="bpDestination">LHR</div>
+                    </div>
+                    <div class="ticket-data-item">
+                        <div class="t-label">Travel Class</div>
+                        <div class="t-val" id="bpClass">Business</div>
+                    </div>
+                    <div class="ticket-data-item">
+                        <div class="t-label">Boarding Date & Time</div>
+                        <div class="t-val" id="bpDate" style="font-size: 13px;">--</div>
+                    </div>
+                    <div class="ticket-data-item">
+                        <div class="t-label">Gate</div>
+                        <div class="t-val" id="bpGate">B22</div>
+                    </div>
+                    <div class="ticket-data-item">
+                        <div class="t-label">Assigned Seat</div>
+                        <div class="t-val" style="color: var(--primary-light);" id="bpSeat">4F</div>
+                    </div>
+                </div>
+
+                <div class="ticket-barcode-strip">
+                    <div class="barcode-simulation">|||||| | |||||||| |||| | |||||| |||||||| |</div>
+                    <div class="ticket-barcode-caption">ETKT-SKYWINGS-AUTH-VERIFIED</div>
+                </div>
+
+                <div style="margin-top: 24px; display: flex; gap: 12px;">
+                    <button class="btn btn-outline" style="flex: 1;" onclick="window.print()">🖨️ Print Ticket</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="closeBoardingPassModal()">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

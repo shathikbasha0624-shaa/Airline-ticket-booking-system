@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+Server/node_modules/
+
+# Logs & Temp files
+*.log
+npm-debug.log*
+*.temp.zip
+
+# Large binary test archives (GitHub recommends files under 25MB)
+SkyWings_Airline_Ticket_Booking_System_50MB.docx
+
+# System files
+.DS_Store
+Thumbs.db

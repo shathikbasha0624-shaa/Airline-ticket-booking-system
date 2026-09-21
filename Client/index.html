@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWings Airlines | Sign In & Register</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+</head>
+<body>
+    <div id="toastContainer"></div>
+
+    <div class="auth-page">
+        <!-- Hero Section -->
+        <div class="auth-hero">
+            <div class="auth-brand">
+                <span>✈️</span> SkyWings Airlines
+            </div>
+
+            <div class="auth-hero-content">
+                <div class="auth-hero-badge">✨ Next-Gen Flight Experience</div>
+                <h1 class="auth-hero-title">Fly Beyond Horizons With Unmatched Comfort.</h1>
+                <p class="auth-hero-desc">
+                    Book flights across 150+ worldwide destinations. Enjoy transparent pricing, customizable seat tiers, instant digital boarding passes, and 24/7 dedicated flight support.
+                </p>
+
+                <div class="auth-features-list">
+                    <div class="auth-feature-item">
+                        <span class="icon">✓</span>
+                        <span>Zero Hidden Fees</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <span class="icon">✓</span>
+                        <span>Instant E-Tickets</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <span class="icon">✓</span>
+                        <span>Luxury Class Tiers</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-hero-footer">
+                &copy; 2026 SkyWings Airlines Inc. All rights reserved. Secure MS SQL Gateway.
+            </div>
+        </div>
+
+        <!-- Auth Form Panel -->
+        <div class="auth-panel">
+            <div class="auth-card">
+                <!-- Tab Controls -->
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab active" id="tabSignIn" onclick="switchAuthTab('signIn')">Sign In</button>
+                    <button type="button" class="auth-tab" id="tabSignUp" onclick="switchAuthTab('signUp')">Create Account</button>
+                </div>
+
+                <!-- SIGN IN FORM -->
+                <div id="signInContainer">
+                    <div class="auth-header">
+                        <h2>Welcome Back</h2>
+                        <p>Enter your credentials to access your flights and tickets.</p>
+                    </div>
+
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="loginEmail">Email Address</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">✉️</span>
+                                <input type="email" id="loginEmail" class="form-input" placeholder="e.g. alex@example.com" required autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="loginPassword">Password</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                                <button type="button" class="password-toggle-btn" onclick="togglePassword('loginPassword')">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
+                            Sign In to SkyWings
+                        </button>
+                    </form>
+
+                    <!-- Quick Demo Credentials Box -->
+                    <div class="demo-credentials-box">
+                        <div class="demo-credentials-title">⚡ Quick 1-Click Demo Logins:</div>
+                        <div class="demo-chips">
+                            <button type="button" class="demo-chip" onclick="fillCredentials('admin@gmail.com', '123456')">
+                                👑 Admin (admin@gmail.com)
+                            </button>
+                            <button type="button" class="demo-chip" onclick="fillCredentials('test@skywings.com', '123456')">
+                                👤 Customer (test@skywings.com)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIGN UP FORM -->
+                <div id="signUpContainer" style="display: none;">
+                    <div class="auth-header">
+                        <h2>Create Account</h2>
+                        <p>Join SkyWings today to book and manage flights effortlessly.</p>
+                    </div>
+
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="regUsername">Full Name</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="regUsername" class="form-input" placeholder="e.g. Captain Morgan" required autocomplete="name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="regEmail">Email Address</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">✉️</span>
+                                <input type="email" id="regEmail" class="form-input" placeholder="e.g. morgan@example.com" required autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="regPassword">Password</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 characters" required autocomplete="new-password">
+                                <button type="button" class="password-toggle-btn" onclick="togglePassword('regPassword')">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="regSubmitBtn">
+                            Create SkyWings Account
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWings | Operations & Admin Command Center</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+</head>
+<body>
+    <div id="toastContainer"></div>
+
+    <!-- Admin Navbar -->
+    <nav class="app-navbar">
+        <a href="admin-dashboard.html" class="app-brand">
+            <span>✈️</span> SkyWings <span class="app-brand-badge" style="background:#fee2e2; color:#dc2626;">Admin Control</span>
+        </a>
+
+        <div class="nav-links">
+            <button class="nav-link-btn active" onclick="scrollToAdminSection('flightOpsSection')">
+                🛫 Flight Operations
+            </button>
+            <button class="nav-link-btn" onclick="scrollToAdminSection('allBookingsSection')">
+                🌍 Passenger Bookings
+            </button>
+        </div>
+
+        <div class="nav-user-actions">
+            <div class="user-profile-badge">
+                <div class="user-avatar" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">👑</div>
+                <div class="user-details">
+                    <span class="user-name-text" id="adminNameText">Super Admin</span>
+                    <span class="user-role-badge" style="color: #dc2626;">System Manager</span>
+                </div>
+            </div>
+            <button onclick="logoutAdmin()" class="btn-logout-nav">
+                🚪 Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Admin Wrapper -->
+    <div class="main-wrapper">
+        <!-- Hero Banner -->
+        <div class="dashboard-hero-banner" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);">
+            <div class="hero-banner-text">
+                <h1>Airline Operations Command Center 🌐</h1>
+                <p>Monitor real-time passenger reservations, manage worldwide flight schedules, and track airline revenue.</p>
+            </div>
+            <div>
+                <button class="btn btn-accent" onclick="scrollToAdminSection('addFlightBox')">
+                    + Add New Flight
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-icon-box blue">🛫</div>
+                <div>
+                    <div class="metric-label">Scheduled Flights</div>
+                    <div class="metric-value" id="adminTotalFlights">0</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon-box green">🎫</div>
+                <div>
+                    <div class="metric-label">Total Reservations</div>
+                    <div class="metric-value" id="adminTotalBookings">0</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon-box amber">💰</div>
+                <div>
+                    <div class="metric-label">Gross Airfare Revenue</div>
+                    <div class="metric-value" id="adminGrossRevenue">$0.00</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon-box purple">👥</div>
+                <div>
+                    <div class="metric-label">Passengers Served</div>
+                    <div class="metric-value" id="adminUniquePassengers">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Flight Section -->
+        <div id="addFlightBox" class="table-card" style="padding: 28px; margin-bottom: 36px;">
+            <div class="section-header" style="margin-bottom: 16px;">
+                <h2>➕ Schedule a New Commercial Flight</h2>
+                <span style="font-size: 13px; color: var(--text-muted);">Instantly available to all passengers in the booking portal</span>
+            </div>
+
+            <!-- Quick Autofill Route Chips -->
+            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Route Presets:</span>
+                <button type="button" class="demo-chip" onclick="presetFlight('SW-777', 'London (LHR)', 'Tokyo (HND)', 750)">
+                    🇬🇧 London ➔ 🇯🇵 Tokyo ($750)
+                </button>
+                <button type="button" class="demo-chip" onclick="presetFlight('SW-888', 'Dubai (DXB)', 'Singapore (SIN)', 480)">
+                    🇦🇪 Dubai ➔ 🇸🇬 Singapore ($480)
+                </button>
+                <button type="button" class="demo-chip" onclick="presetFlight('SW-999', 'New York (JFK)', 'Paris (CDG)', 520)">
+                    🇺🇸 New York ➔ 🇫🇷 Paris ($520)
+                </button>
+            </div>
+
+            <form id="addFlightForm" onsubmit="handleCreateFlight(event)">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="flightNo">Flight Number</label>
+                        <input type="text" id="flightNo" class="form-input" placeholder="e.g. SW-808" required>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="flightOrigin">Origin Airport</label>
+                        <input type="text" id="flightOrigin" class="form-input" placeholder="e.g. Los Angeles (LAX)" required>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="flightDestination">Destination Airport</label>
+                        <input type="text" id="flightDestination" class="form-input" placeholder="e.g. Sydney (SYD)" required>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="flightDeparture">Departure Date & Time</label>
+                        <input type="datetime-local" id="flightDeparture" class="form-input" required>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="flightPrice">Base Price ($USD)</label>
+                        <input type="number" step="0.01" id="flightPrice" class="form-input" placeholder="e.g. 350.00" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary" id="addFlightSubmitBtn" style="width: auto; padding: 12px 28px;">
+                        ✈️ Publish Flight to Schedule
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Scheduled Flights Table Operations -->
+        <section id="flightOpsSection" style="margin-bottom: 48px;">
+            <div class="section-header">
+                <h2>🛫 Active Flight Inventory</h2>
+                <span style="font-size: 13px; color: var(--text-muted);">Manage and remove scheduled flights</span>
+            </div>
+
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Flight No.</th>
+                                <th>Origin</th>
+                                <th>Destination</th>
+                                <th>Departure Time</th>
+                                <th>Base Fare</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminFlightsTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- All Passenger Bookings Supervision -->
+        <section id="allBookingsSection">
+            <div class="section-header">
+                <h2>🌍 Global Passenger Bookings Log</h2>
+                <div style="max-width: 320px; width: 100%;">
+                    <input type="text" id="bookingSearchInput" class="form-input" placeholder="Filter passenger or flight..." oninput="filterAdminBookings()" style="padding: 8px 14px; font-size: 13px; margin: 0;">
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Passenger</th>
+                                <th>Email</th>
+                                <th>Flight No.</th>
+                                <th>Route</th>
+                                <th>Class</th>
+                                <th>Revenue</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Control</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAllBookingsBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>
