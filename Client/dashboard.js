@@ -69,9 +69,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         avatarEl.innerText = activeUser.username.charAt(0).toUpperCase();
     }
 
+    // Dynamic Time-of-Day Customer Welcome
+    const hour = new Date().getHours();
+    let greeting = 'Good evening';
+    if (hour < 12) greeting = 'Good morning';
+    else if (hour < 17) greeting = 'Good afternoon';
+
+    const greetingTimeEl = document.getElementById('greetingTimeText');
+    const heroWelcomeEl = document.getElementById('heroWelcomeName');
+    if (greetingTimeEl) greetingTimeEl.innerText = greeting;
+    if (heroWelcomeEl && activeUser?.username) heroWelcomeEl.innerText = activeUser.username;
+
     // Load Data Fast
     await Promise.all([fetchFlights(), fetchMyBookings()]);
 });
+
+// Smooth Value Counter Animation for Metrics
+function animateValue(element, start, end, duration = 750, prefix = '', decimals = 0) {
+    if (!element) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentVal = start + (end - start) * easeOut;
+        element.innerText = `${prefix}${currentVal.toFixed(decimals)}`;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            element.innerText = `${prefix}${end.toFixed(decimals)}`;
+        }
+    };
+    window.requestAnimationFrame(step);
+}
 
 // Logout
 function logoutUser() {
@@ -96,7 +126,7 @@ async function fetchFlights() {
         allFlights = await res.json();
         
         const metricEl = document.getElementById('metricTotalFlights');
-        if (metricEl) metricEl.innerText = allFlights.length;
+        if (metricEl) animateValue(metricEl, 0, allFlights.length, 650);
         
         renderFlightsGrid(allFlights);
     } catch (err) {
@@ -136,10 +166,10 @@ function updateMetricsAndBadges() {
     if (badgeEl) badgeEl.innerText = confirmedCount;
 
     const tripsMetricEl = document.getElementById('metricConfirmedTrips');
-    if (tripsMetricEl) tripsMetricEl.innerText = confirmedCount;
+    if (tripsMetricEl) animateValue(tripsMetricEl, 0, confirmedCount, 600);
 
     const spentMetricEl = document.getElementById('metricTotalSpent');
-    if (spentMetricEl) spentMetricEl.innerText = `$${totalSpent.toFixed(2)}`;
+    if (spentMetricEl) animateValue(spentMetricEl, 0, totalSpent, 750, '$', 2);
 }
 
 // Extract City & Code helper
@@ -488,6 +518,7 @@ async function processFlightBooking() {
 
         if (response.ok) {
             closeBookingModal();
+            launchConfetti();
             showToast('🎉 Reservation Confirmed! E-ticket issued in your trips.', 'success');
             
             // Reload user bookings fast
@@ -577,3 +608,66 @@ function closeBoardingPassModal() {
     const modal = document.getElementById('boardingPassModal');
     if (modal) modal.classList.remove('active');
 }
+
+// Celebration Confetti Particle Burst Engine
+function launchConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
+    canvas.style.display = 'block';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    const pieces = [];
+    const colors = ['#2563eb', '#38bdf8', '#f59e0b', '#10b981', '#ec4899', '#8b5cf6', '#ffffff'];
+    for (let i = 0; i < 90; i++) {
+        pieces.push({
+            x: canvas.width / 2 + (Math.random() * 260 - 130),
+            y: canvas.height / 2 + (Math.random() * 100 - 50),
+            w: Math.random() * 10 + 6,
+            h: Math.random() * 6 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.8) * 15 - 3,
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 12,
+            gravity: 0.35,
+            alpha: 1
+        });
+    }
+
+    let animationFrameId;
+    const render = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let activeCount = 0;
+
+        pieces.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.rotation += p.rotSpeed;
+            p.alpha -= 0.009;
+
+            if (p.alpha > 0) {
+                activeCount++;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            }
+        });
+
+        if (activeCount > 0) {
+            animationFrameId = requestAnimationFrame(render);
+        } else {
+            cancelAnimationFrame(animationFrameId);
+            canvas.style.display = 'none';
+        }
+    };
+
+    render();
+}
+

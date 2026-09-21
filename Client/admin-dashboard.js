@@ -124,16 +124,35 @@ async function loadAllBookings() {
     }
 }
 
+// Smooth Value Counter Animation for Metrics
+function animateValue(element, start, end, duration = 750, prefix = '', decimals = 0) {
+    if (!element) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentVal = start + (end - start) * easeOut;
+        element.innerText = `${prefix}${currentVal.toFixed(decimals)}`;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            element.innerText = `${prefix}${end.toFixed(decimals)}`;
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
 // Metrics Calculation
 function calculateAdminMetrics() {
     // 1. Scheduled Flights
     const flightsCountEl = document.getElementById('adminTotalFlights');
-    if (flightsCountEl) flightsCountEl.innerText = adminFlights.length;
+    if (flightsCountEl) animateValue(flightsCountEl, 0, adminFlights.length, 650);
 
     // 2. Total Reservations
     const totalReservations = allCustomerBookings.length;
     const bookingsCountEl = document.getElementById('adminTotalBookings');
-    if (bookingsCountEl) bookingsCountEl.innerText = totalReservations;
+    if (bookingsCountEl) animateValue(bookingsCountEl, 0, totalReservations, 700);
 
     // 3. Gross Revenue (excluding cancelled)
     const activeBookings = allCustomerBookings.filter(b => b.Status !== 'Cancelled');
@@ -142,12 +161,12 @@ function calculateAdminMetrics() {
     }, 0);
 
     const revenueEl = document.getElementById('adminGrossRevenue');
-    if (revenueEl) revenueEl.innerText = `$${grossRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    if (revenueEl) animateValue(revenueEl, 0, grossRevenue, 800, '$', 2);
 
     // 4. Unique Passengers
     const uniqueEmails = new Set(allCustomerBookings.map(b => b.Email));
     const passengersEl = document.getElementById('adminUniquePassengers');
-    if (passengersEl) passengersEl.innerText = uniqueEmails.size;
+    if (passengersEl) animateValue(passengersEl, 0, uniqueEmails.size, 650);
 }
 
 // Render Scheduled Flights Table

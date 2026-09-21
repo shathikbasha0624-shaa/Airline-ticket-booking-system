@@ -39,15 +39,45 @@
         </div>
     </nav>
 
+    <!-- Airport Live Flight Radar Ticker Bar -->
+    <div class="airport-ticker-bar">
+        <div class="ticker-badge">🔴 RADAR LIVE</div>
+        <div class="ticker-track">
+            <div class="ticker-items">
+                <span>🟢 SW-101: New York (JFK) ➔ London (LHR) • On Schedule</span>
+                <span>🔵 SW-202: Tokyo (HND) ➔ Paris (CDG) • Boarding Gate B4</span>
+                <span>🟢 SW-303: Dubai (DXB) ➔ Singapore (SIN) • On Schedule</span>
+                <span>🟡 SW-404: London (LHR) ➔ Paris (CDG) • Gate Open</span>
+                <span>👑 SkyWings First Class Lounge ➔ Open for Passengers</span>
+                <span>✨ 150+ Worldwide Routes Active Today</span>
+            </div>
+            <div class="ticker-items">
+                <span>🟢 SW-101: New York (JFK) ➔ London (LHR) • On Schedule</span>
+                <span>🔵 SW-202: Tokyo (HND) ➔ Paris (CDG) • Boarding Gate B4</span>
+                <span>🟢 SW-303: Dubai (DXB) ➔ Singapore (SIN) • On Schedule</span>
+                <span>🟡 SW-404: London (LHR) ➔ Paris (CDG) • Gate Open</span>
+                <span>👑 SkyWings First Class Lounge ➔ Open for Passengers</span>
+                <span>✨ 150+ Worldwide Routes Active Today</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Wrapper -->
     <div class="main-wrapper">
-        <!-- Hero Banner -->
+        <!-- Hero Banner with Dynamic Sky Animation -->
         <div class="dashboard-hero-banner" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);">
+            <!-- Animated Jet & Drifting Clouds -->
+            <div class="hero-sky-animation">
+                <div class="hero-jet-plane">✈️<span class="jet-contrail"></span></div>
+                <div class="drifting-cloud c1"></div>
+                <div class="drifting-cloud c2"></div>
+            </div>
+
             <div class="hero-banner-text">
                 <h1>Airline Operations Command Center 🌐</h1>
                 <p>Monitor real-time passenger reservations, manage worldwide flight schedules, and track airline revenue.</p>
             </div>
-            <div>
+            <div style="position: relative; z-index: 2;">
                 <button class="btn btn-accent" onclick="scrollToAdminSection('addFlightBox')">
                     + Add New Flight
                 </button>
