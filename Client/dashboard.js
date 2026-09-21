@@ -232,7 +232,10 @@ function renderFlightsGrid(flights) {
         return `
             <div class="flight-card animate-fade" style="animation-delay: ${idx * 0.04}s">
                 <div class="flight-card-top">
-                    <span class="airline-code-badge">✈️ ${f.FlightNumber}</span>
+                    <span class="airline-code-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                        ${f.FlightNumber}
+                    </span>
                     <span class="flight-status-indicator">
                         <span class="status-dot"></span> On Time
                     </span>
@@ -245,7 +248,9 @@ function renderFlightsGrid(flights) {
                     </div>
 
                     <div class="route-midline">
-                        <span class="plane-icon-travel">✈</span>
+                        <span class="plane-icon-travel">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#2563eb"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                        </span>
                         <div class="route-line"></div>
                         <span class="route-duration-text">Direct Flight</span>
                     </div>
@@ -258,13 +263,22 @@ function renderFlightsGrid(flights) {
 
                 <div class="flight-meta-details">
                     <div class="flight-time-row">
-                        <span>📅</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         <span>Departure: <strong>${depDate}</strong></span>
                     </div>
                     <div class="amenity-chips">
-                        <span class="amenity-chip">🧳 23kg Bag</span>
-                        <span class="amenity-chip">📶 In-flight WiFi</span>
-                        <span class="amenity-chip">🍽️ Meals Included</span>
+                        <span class="amenity-chip">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;"><rect x="6" y="7" width="12" height="14" rx="2"></rect><path d="M9 7V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3"></path><line x1="9" y1="21" x2="9" y2="23"></line><line x1="15" y1="21" x2="15" y2="23"></line></svg>
+                            23kg Bag
+                        </span>
+                        <span class="amenity-chip">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                            WiFi
+                        </span>
+                        <span class="amenity-chip">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="6" x2="6" y2="2"></line><line x1="10" y1="6" x2="10" y2="2"></line><line x1="14" y1="6" x2="14" y2="2"></line></svg>
+                            Meals
+                        </span>
                     </div>
                 </div>
 
@@ -275,7 +289,7 @@ function renderFlightsGrid(flights) {
                     </div>
                     <button type="button" class="btn-book-card" onclick="openBookingModal('${flightIdStr}')">
                         <span>Book Flight</span>
-                        <span class="plane-arrow">✈</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </button>
                 </div>
             </div>
@@ -358,7 +372,10 @@ function renderBookingsTable() {
             <tr class="${isRecent ? 'row-highlight' : ''}">
                 <td><strong>#BK-${bookingId}</strong></td>
                 <td>
-                    <span class="airline-code-badge" style="font-size: 11px;">✈️ ${b.FlightNumber}</span>
+                    <span class="airline-code-badge" style="font-size: 11px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 3px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                        ${b.FlightNumber}
+                    </span>
                 </td>
                 <td>
                     <div style="font-weight: 600;">${b.Origin} ➔ ${b.Destination}</div>
@@ -381,7 +398,8 @@ function renderBookingsTable() {
                     <div style="display: inline-flex; gap: 8px;">
                         <button type="button" class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" 
                                 onclick="openBoardingPassById('${bookingId}')">
-                            🎫 E-Ticket
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="6" cy="12" r="2"></circle><circle cx="18" cy="12" r="2"></circle></svg>
+                            Boarding Pass
                         </button>
                         ${!isCancelled ? `
                             <button type="button" class="btn-danger-outline" onclick="cancelUserBooking('${bookingId}')">
@@ -494,7 +512,10 @@ async function processFlightBooking() {
     const confirmBtn = document.getElementById('confirmBookingBtn');
     if (confirmBtn) {
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<span>✈️ Securing Seat & Processing...</span>';
+        confirmBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="plane-icon-travel"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+            <span>Securing Seat & Processing...</span>
+        `;
     }
 
     const baseFare = Number(currentSelectedFlight.Price);
@@ -519,7 +540,7 @@ async function processFlightBooking() {
         if (response.ok) {
             closeBookingModal();
             launchConfetti();
-            showToast('🎉 Reservation Confirmed! E-ticket issued in your trips.', 'success');
+            showToast('Reservation Confirmed! E-ticket issued in your trips.', 'success');
             
             // Reload user bookings fast
             await fetchMyBookings();
@@ -543,7 +564,10 @@ async function processFlightBooking() {
     } finally {
         if (confirmBtn) {
             confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<span>💳 Reserve & Pay Now</span>';
+            confirmBtn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <span>Reserve & Pay Now</span>
+            `;
         }
     }
 }
@@ -602,14 +626,25 @@ function openBoardingPassById(bookingId) {
     if (fSeat) fSeat.innerText = currentAssignedSeat || '12A';
 
     modal.classList.add('active');
+
+    // Trigger authentic airline customs rubber stamp animation
+    const card = document.getElementById('ticketModalCard');
+    if (card) {
+        card.classList.remove('stamped');
+        setTimeout(() => {
+            card.classList.add('stamped');
+        }, 120);
+    }
 }
 
 function closeBoardingPassModal() {
     const modal = document.getElementById('boardingPassModal');
     if (modal) modal.classList.remove('active');
+    const card = document.getElementById('ticketModalCard');
+    if (card) card.classList.remove('stamped');
 }
 
-// Celebration Confetti Particle Burst Engine
+// 3D Shimmering Metallic Ribbon Confetti Engine
 function launchConfetti() {
     const canvas = document.getElementById('confettiCanvas');
     if (!canvas) return;
@@ -619,19 +654,30 @@ function launchConfetti() {
     const ctx = canvas.getContext('2d');
 
     const pieces = [];
-    const colors = ['#2563eb', '#38bdf8', '#f59e0b', '#10b981', '#ec4899', '#8b5cf6', '#ffffff'];
-    for (let i = 0; i < 90; i++) {
+    const metallicFoilColors = [
+        '#facc15', // 24k Gold Foil
+        '#38bdf8', // Sapphire Metallic
+        '#34d399', // Emerald Metallic
+        '#fb7185', // Rose Gold
+        '#a855f7', // Electric Violet
+        '#f8fafc', // Platinum Silver
+        '#60a5fa'  // Sky Blue
+    ];
+
+    for (let i = 0; i < 110; i++) {
         pieces.push({
-            x: canvas.width / 2 + (Math.random() * 260 - 130),
-            y: canvas.height / 2 + (Math.random() * 100 - 50),
-            w: Math.random() * 10 + 6,
+            x: canvas.width / 2 + (Math.random() * 280 - 140),
+            y: canvas.height / 2 + (Math.random() * 80 - 40),
+            w: Math.random() * 12 + 6,
             h: Math.random() * 6 + 4,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            vx: (Math.random() - 0.5) * 16,
-            vy: (Math.random() - 0.8) * 15 - 3,
-            rotation: Math.random() * 360,
-            rotSpeed: (Math.random() - 0.5) * 12,
-            gravity: 0.35,
+            color: metallicFoilColors[Math.floor(Math.random() * metallicFoilColors.length)],
+            vx: (Math.random() - 0.5) * 18,
+            vy: (Math.random() - 0.85) * 16 - 3,
+            rotX: Math.random() * Math.PI,
+            rotY: Math.random() * Math.PI,
+            rotXSpeed: (Math.random() - 0.5) * 0.18,
+            rotYSpeed: (Math.random() - 0.5) * 0.18,
+            gravity: 0.38,
             alpha: 1
         });
     }
@@ -645,16 +691,22 @@ function launchConfetti() {
             p.x += p.vx;
             p.y += p.vy;
             p.vy += p.gravity;
-            p.rotation += p.rotSpeed;
-            p.alpha -= 0.009;
+            p.vx *= 0.985;
+            p.rotX += p.rotXSpeed;
+            p.rotY += p.rotYSpeed;
+            p.alpha -= 0.008;
 
             if (p.alpha > 0) {
                 activeCount++;
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                ctx.rotate((p.rotation * Math.PI) / 180);
+                const scaleX = Math.cos(p.rotX);
+                const scaleY = Math.sin(p.rotY);
+                ctx.scale(scaleX, scaleY);
                 ctx.globalAlpha = Math.max(0, p.alpha);
                 ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 4;
                 ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
                 ctx.restore();
             }
@@ -670,4 +722,5 @@ function launchConfetti() {
 
     render();
 }
+
 

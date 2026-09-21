@@ -194,14 +194,23 @@ function renderAdminFlightsTable() {
 
         return `
             <tr>
-                <td><strong>✈️ ${f.FlightNumber}</strong></td>
+                <td>
+                    <strong>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                        ${f.FlightNumber}
+                    </strong>
+                </td>
                 <td>${f.Origin}</td>
                 <td>${f.Destination}</td>
-                <td>📅 ${depDate}</td>
+                <td>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -1px;"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                    ${depDate}
+                </td>
                 <td><strong style="color: var(--primary);">$${Number(f.Price).toFixed(2)}</strong></td>
                 <td style="text-align: right;">
                     <button type="button" class="btn-danger-outline" onclick="deleteFlightRecord('${f.Id || f.id}', '${f.FlightNumber}')">
-                        🗑️ Delete Flight
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -1px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Delete Flight
                     </button>
                 </td>
             </tr>
@@ -321,7 +330,10 @@ async function handleCreateFlight(event) {
         showToast('Server error publishing flight.', 'error');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '✈️ Publish Flight to Schedule';
+        submitBtn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+            Publish Flight to Schedule
+        `;
     }
 }
 
