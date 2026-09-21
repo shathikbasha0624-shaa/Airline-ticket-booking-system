@@ -1,10 +1,158 @@
 /**
  * SkyWings Airlines - Admin Dashboard & Flight Operations Center
  * Full inventory management, real-time booking surveillance, and revenue analytics.
+ * Includes Multi-Currency Conversion & Synthesized Audio Chimes.
  */
 
 let adminFlights = [];
 let allCustomerBookings = [];
+
+// =========================================================
+// 1. MULTI-CURRENCY CONVERSION SYSTEM
+// =========================================================
+const CURRENCIES = {
+    USD: { symbol: '$', rate: 1.0, decimals: 2 },
+    EUR: { symbol: '€', rate: 0.92, decimals: 2 },
+    GBP: { symbol: '£', rate: 0.79, decimals: 2 },
+    INR: { symbol: '₹', rate: 83.5, decimals: 0 },
+    AED: { symbol: 'AED ', rate: 3.67, decimals: 2 },
+    JPY: { symbol: '¥', rate: 155.0, decimals: 0 }
+};
+
+let currentCurrency = localStorage.getItem('skywings_currency') || 'USD';
+
+function formatPrice(usdAmount) {
+    const cur = CURRENCIES[currentCurrency] || CURRENCIES.USD;
+    const converted = Number(usdAmount || 0) * cur.rate;
+    return `${cur.symbol}${converted.toLocaleString(undefined, {
+        minimumFractionDigits: cur.decimals,
+        maximumFractionDigits: cur.decimals
+    })}`;
+}
+
+function changeCurrency(newCode) {
+    if (!CURRENCIES[newCode]) return;
+    currentCurrency = newCode;
+    localStorage.setItem('skywings_currency', newCode);
+    playSeatClick();
+
+    renderAdminFlightsTable();
+    renderAdminBookingsTable(allCustomerBookings);
+    calculateAdminMetrics();
+    showToast(`Display currency changed to ${newCode}`, 'info');
+}
+
+// =========================================================
+// 2. SYNTHESIZED WEB AUDIO API CHIME ENGINE
+// =========================================================
+let audioCtx = null;
+let audioEnabled = localStorage.getItem('skywings_audio') !== 'false';
+
+function initAudioContext() {
+    if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function toggleAudio() {
+    audioEnabled = !audioEnabled;
+    localStorage.setItem('skywings_audio', audioEnabled ? 'true' : 'false');
+
+    const btn = document.getElementById('audioToggleBtn');
+    const icon = document.getElementById('audioIcon');
+    const text = document.getElementById('audioText');
+
+    if (btn) btn.classList.toggle('active', audioEnabled);
+    if (icon) icon.innerText = audioEnabled ? '🔊' : '🔇';
+    if (text) text.innerText = audioEnabled ? 'Sound: ON' : 'Sound: OFF';
+
+    if (audioEnabled) {
+        initAudioContext();
+        playCabinChime();
+        showToast('Operations audio feedback enabled.', 'info');
+    } else {
+        showToast('Operations audio feedback muted.', 'info');
+    }
+}
+
+function playCabinChime() {
+    if (!audioEnabled) return;
+    initAudioContext();
+    if (!audioCtx) return;
+
+    try {
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(587.33, now);
+        gain1.gain.setValueAtTime(0.001, now);
+        gain1.gain.exponentialRampToValueAtTime(0.25, now + 0.04);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.5);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(440.0, now + 0.38);
+        gain2.gain.setValueAtTime(0.001, now + 0.38);
+        gain2.gain.exponentialRampToValueAtTime(0.2, now + 0.42);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.38);
+        osc2.stop(now + 1.1);
+    } catch (e) {}
+}
+
+function playSeatClick() {
+    if (!audioEnabled) return;
+    initAudioContext();
+    if (!audioCtx) return;
+    try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1180, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+    } catch (e) {}
+}
+
+function playSuccessChord() {
+    if (!audioEnabled) return;
+    initAudioContext();
+    if (!audioCtx) return;
+    try {
+        const now = audioCtx.currentTime;
+        [523.25, 659.25, 783.99].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const start = now + idx * 0.1;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.exponentialRampToValueAtTime(0.2, start + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(start);
+            osc.stop(start + 0.6);
+        });
+    } catch (e) {}
+}
 
 // Toast Notification Engine
 function showToast(message, type = 'info') {
@@ -53,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const nameEl = document.getElementById('adminNameText');
-        if (nameEl) nameEl.innerText = user.username || 'System Admin';
+        if (nameEl) nameEl.innerText = user.username || 'Super Admin';
 
         // Pre-fill default departure time to tomorrow 10:00 AM
         const depInput = document.getElementById('flightDeparture');
@@ -63,6 +211,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             tomorrow.setHours(10, 0, 0, 0);
             depInput.value = tomorrow.toISOString().slice(0, 16);
         }
+
+        // Synchronize Currency & Audio Controls
+        const curSelector = document.getElementById('currencySelector');
+        if (curSelector) curSelector.value = currentCurrency;
+
+        const audioBtn = document.getElementById('audioToggleBtn');
+        const audioIcon = document.getElementById('audioIcon');
+        const audioText = document.getElementById('audioText');
+        if (audioBtn) audioBtn.classList.toggle('active', audioEnabled);
+        if (audioIcon) audioIcon.innerText = audioEnabled ? '🔊' : '🔇';
+        if (audioText) audioText.innerText = audioEnabled ? 'Sound: ON' : 'Sound: OFF';
+
+        document.addEventListener('click', () => { initAudioContext(); }, { once: true });
 
         await loadAdminData();
     } catch (err) {
@@ -85,6 +246,7 @@ function scrollToAdminSection(id) {
 
 // Route Preset Helper
 function presetFlight(code, origin, dest, price) {
+    playSeatClick();
     document.getElementById('flightNo').value = code;
     document.getElementById('flightOrigin').value = origin;
     document.getElementById('flightDestination').value = dest;
@@ -125,19 +287,39 @@ async function loadAllBookings() {
 }
 
 // Smooth Value Counter Animation for Metrics
-function animateValue(element, start, end, duration = 750, prefix = '', decimals = 0) {
+function animateValue(element, start, end, duration = 750, isCurrency = false) {
     if (!element) return;
     let startTimestamp = null;
+    const cur = CURRENCIES[currentCurrency] || CURRENCIES.USD;
+
     const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         const easeOut = 1 - Math.pow(1 - progress, 3);
         const currentVal = start + (end - start) * easeOut;
-        element.innerText = `${prefix}${currentVal.toFixed(decimals)}`;
+
+        if (isCurrency) {
+            const converted = currentVal * cur.rate;
+            element.innerText = `${cur.symbol}${converted.toLocaleString(undefined, {
+                minimumFractionDigits: cur.decimals,
+                maximumFractionDigits: cur.decimals
+            })}`;
+        } else {
+            element.innerText = Math.round(currentVal).toString();
+        }
+
         if (progress < 1) {
             window.requestAnimationFrame(step);
         } else {
-            element.innerText = `${prefix}${end.toFixed(decimals)}`;
+            if (isCurrency) {
+                const finalConverted = end * cur.rate;
+                element.innerText = `${cur.symbol}${finalConverted.toLocaleString(undefined, {
+                    minimumFractionDigits: cur.decimals,
+                    maximumFractionDigits: cur.decimals
+                })}`;
+            } else {
+                element.innerText = end.toString();
+            }
         }
     };
     window.requestAnimationFrame(step);
@@ -145,25 +327,21 @@ function animateValue(element, start, end, duration = 750, prefix = '', decimals
 
 // Metrics Calculation
 function calculateAdminMetrics() {
-    // 1. Scheduled Flights
     const flightsCountEl = document.getElementById('adminTotalFlights');
     if (flightsCountEl) animateValue(flightsCountEl, 0, adminFlights.length, 650);
 
-    // 2. Total Reservations
     const totalReservations = allCustomerBookings.length;
     const bookingsCountEl = document.getElementById('adminTotalBookings');
     if (bookingsCountEl) animateValue(bookingsCountEl, 0, totalReservations, 700);
 
-    // 3. Gross Revenue (excluding cancelled)
     const activeBookings = allCustomerBookings.filter(b => b.Status !== 'Cancelled');
-    const grossRevenue = activeBookings.reduce((sum, b) => {
+    const grossRevenueUSD = activeBookings.reduce((sum, b) => {
         return sum + (Number(b.TotalPrice) || Number(b.BasePrice) || 0);
     }, 0);
 
     const revenueEl = document.getElementById('adminGrossRevenue');
-    if (revenueEl) animateValue(revenueEl, 0, grossRevenue, 800, '$', 2);
+    if (revenueEl) animateValue(revenueEl, 0, grossRevenueUSD, 800, true);
 
-    // 4. Unique Passengers
     const uniqueEmails = new Set(allCustomerBookings.map(b => b.Email));
     const passengersEl = document.getElementById('adminUniquePassengers');
     if (passengersEl) animateValue(passengersEl, 0, uniqueEmails.size, 650);
@@ -203,10 +381,10 @@ function renderAdminFlightsTable() {
                 <td>${f.Origin}</td>
                 <td>${f.Destination}</td>
                 <td>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -1px;"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -1px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
                     ${depDate}
                 </td>
-                <td><strong style="color: var(--primary);">$${Number(f.Price).toFixed(2)}</strong></td>
+                <td><strong style="color: var(--primary); font-family: 'Space Grotesk', sans-serif;">${formatPrice(f.Price)}</strong></td>
                 <td style="text-align: right;">
                     <button type="button" class="btn-danger-outline" onclick="deleteFlightRecord('${f.Id || f.id}', '${f.FlightNumber}')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -1px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -238,7 +416,7 @@ function renderAdminBookingsTable(bookings) {
 
     tbody.innerHTML = bookings.map(b => {
         const date = new Date(b.BookingDate).toLocaleDateString();
-        const price = Number(b.TotalPrice) || Number(b.BasePrice) || 0;
+        const priceUSD = Number(b.TotalPrice) || Number(b.BasePrice) || 0;
         const fClass = b.FlightClass || 'Economy';
 
         let classPill = 'economy';
@@ -259,7 +437,7 @@ function renderAdminBookingsTable(bookings) {
                 <td><span class="airline-code-badge" style="font-size: 11px;">${b.FlightNumber}</span></td>
                 <td>${b.Origin} ➔ ${b.Destination}</td>
                 <td><span class="class-pill ${classPill}">${fClass}</span></td>
-                <td><strong style="color: var(--success); font-family: 'Space Grotesk', sans-serif;">$${price.toFixed(2)}</strong></td>
+                <td><strong style="color: var(--success); font-family: 'Space Grotesk', sans-serif;">${formatPrice(priceUSD)}</strong></td>
                 <td><span class="status-pill ${statusClass}">● ${b.Status || 'Confirmed'}</span></td>
                 <td style="text-align: right;">
                     ${!isCancelled ? `
@@ -317,6 +495,7 @@ async function handleCreateFlight(event) {
         const data = await res.json();
 
         if (res.ok) {
+            playSuccessChord();
             showToast(`Flight ${flightNumber} published successfully!`, 'success');
             document.getElementById('addFlightForm').reset();
             await loadFlights();
@@ -348,6 +527,7 @@ async function deleteFlightRecord(flightId, flightNumber) {
 
         const data = await res.json();
         if (res.ok) {
+            playCabinChime();
             showToast(`Flight ${flightNumber} removed from inventory.`, 'info');
             await loadAdminData();
         } else {
@@ -370,6 +550,7 @@ async function adminCancelBooking(bookingId) {
 
         const data = await res.json();
         if (res.ok) {
+            playSeatClick();
             showToast(`Booking #BK-${bookingId} marked as Cancelled.`, 'info');
             await loadAllBookings();
             calculateAdminMetrics();

@@ -31,6 +31,25 @@
         </div>
 
         <div class="nav-user-actions">
+            <!-- Audio Chime & Currency Quick Controls -->
+            <div class="nav-quick-controls">
+                <div class="currency-select-box" title="Switch display currency">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-7 0c0 4 7 2 7 6a3.5 3.5 0 0 1-7 0"></path></svg>
+                    <select id="currencySelector" onchange="changeCurrency(this.value)">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="INR">INR (₹)</option>
+                        <option value="AED">AED (د.إ)</option>
+                        <option value="JPY">JPY (¥)</option>
+                    </select>
+                </div>
+                <button id="audioToggleBtn" class="btn-audio-toggle active" onclick="toggleAudio()" title="Toggle In-Flight Sound Chimes">
+                    <span id="audioIcon">🔊</span>
+                    <span id="audioText">Sound: ON</span>
+                </button>
+            </div>
+
             <div class="user-profile-badge">
                 <div class="user-avatar" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path></svg>

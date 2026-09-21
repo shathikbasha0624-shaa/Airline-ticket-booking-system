@@ -31,6 +31,25 @@
         </div>
 
         <div class="nav-user-actions">
+            <!-- Audio Chime & Currency Quick Controls -->
+            <div class="nav-quick-controls">
+                <div class="currency-select-box" title="Switch display currency">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-7 0c0 4 7 2 7 6a3.5 3.5 0 0 1-7 0"></path></svg>
+                    <select id="currencySelector" onchange="changeCurrency(this.value)">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="INR">INR (₹)</option>
+                        <option value="AED">AED (د.إ)</option>
+                        <option value="JPY">JPY (¥)</option>
+                    </select>
+                </div>
+                <button id="audioToggleBtn" class="btn-audio-toggle active" onclick="toggleAudio()" title="Toggle In-Flight Sound Chimes">
+                    <span id="audioIcon">🔊</span>
+                    <span id="audioText">Sound: ON</span>
+                </button>
+            </div>
+
             <div class="user-profile-badge">
                 <div class="user-avatar" id="userAvatarLetter">U</div>
                 <div class="user-details">
@@ -255,9 +274,30 @@
                     </select>
                 </div>
 
+                <div class="filter-item">
+                    <label for="timeFilter">Departure Time</label>
+                    <select id="timeFilter" class="filter-input" onchange="handleFilterChange()" style="padding-left: 14px;">
+                        <option value="all">Any Departure Time</option>
+                        <option value="morning">Morning (06:00 - 12:00)</option>
+                        <option value="afternoon">Afternoon (12:00 - 18:00)</option>
+                        <option value="evening">Evening / Night (18:00 - 24:00)</option>
+                    </select>
+                </div>
+
                 <div class="filter-actions">
                     <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
                 </div>
+            </div>
+
+            <!-- Quick-Filter Popular Aviation Hub Chips -->
+            <div class="city-filter-chips">
+                <span class="city-chip active" onclick="filterByCityChip('all', this)">🌐 All Routes</span>
+                <span class="city-chip" onclick="filterByCityChip('London', this)">🇬🇧 London (LHR)</span>
+                <span class="city-chip" onclick="filterByCityChip('Tokyo', this)">🇯🇵 Tokyo (HND)</span>
+                <span class="city-chip" onclick="filterByCityChip('New York', this)">🇺🇸 New York (JFK)</span>
+                <span class="city-chip" onclick="filterByCityChip('Dubai', this)">🇦🇪 Dubai (DXB)</span>
+                <span class="city-chip" onclick="filterByCityChip('Paris', this)">🇫🇷 Paris (CDG)</span>
+                <span class="city-chip" onclick="filterByCityChip('Singapore', this)">🇸🇬 Singapore (SIN)</span>
             </div>
         </div>
 
@@ -310,10 +350,10 @@
     </div>
 
     <!-- =========================================================
-         INTERACTIVE MULTI-CLASS BOOKING MODAL
+         INTERACTIVE MULTI-CLASS BOOKING & CABIN SEAT MAP MODAL
          ========================================================= -->
     <div id="bookingModal" class="modal-overlay">
-        <div class="modal-container">
+        <div class="modal-container" style="max-width: 620px;">
             <div class="modal-header">
                 <div class="modal-title-wrap">
                     <h3 id="modalFlightNumber">Confirm Flight Reservation</h3>
@@ -323,7 +363,7 @@
             </div>
 
             <div class="modal-body">
-                <!-- Quick Route Pill -->
+                <!-- Flight Summary Bar -->
                 <div class="modal-flight-summary">
                     <div class="modal-summary-item">
                         <div class="label">Flight Date</div>
@@ -335,73 +375,415 @@
                     </div>
                     <div class="modal-summary-item">
                         <div class="label">Assigned Seat</div>
-                        <div class="value" id="modalAssignedSeat">14A</div>
+                        <div class="value" id="modalAssignedSeat" style="color: var(--primary-light); font-weight: 900;">14A</div>
                     </div>
                 </div>
 
-                <!-- Class Tier Selector -->
-                <div class="class-tiers-label">
-                    <span>1. Choose Travel Experience:</span>
-                    <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Tap a tier to calculate fare</span>
+                <!-- Modal Step Navigation -->
+                <div class="modal-steps-nav">
+                    <button type="button" class="modal-step-btn active" id="modalStepBtn1" onclick="switchModalStep(1)">
+                        <span class="step-num-bubble">1</span>
+                        <span>Cabin & Seat Map</span>
+                    </button>
+                    <button type="button" class="modal-step-btn" id="modalStepBtn2" onclick="switchModalStep(2)">
+                        <span class="step-num-bubble">2</span>
+                        <span>In-Flight Extras & Dining</span>
+                    </button>
                 </div>
 
-                <div class="tier-cards-container">
-                    <!-- Economy -->
-                    <div class="tier-card selected" id="tierCardEconomy" onclick="selectClassTier('Economy', 1)">
-                        <div>
-                            <span class="tier-badge economy">Standard</span>
-                            <div class="tier-name">Economy</div>
-                            <div class="tier-multiplier-text">1.0x Base Rate</div>
-                        </div>
-                        <ul class="tier-features">
-                            <li>23kg Check-in Bag</li>
-                            <li>Complimentary Meal</li>
-                            <li>Standard Legroom</li>
-                        </ul>
+                <!-- STEP 1: CLASS TIERS & INTERACTIVE CABIN SEAT MAP -->
+                <div id="modalStep1Content">
+                    <!-- Class Tier Selector -->
+                    <div class="class-tiers-label">
+                        <span>1. Choose Cabin Class:</span>
+                        <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Auto-aligns available seats below</span>
                     </div>
 
-                    <!-- Business -->
-                    <div class="tier-card" id="tierCardBusiness" onclick="selectClassTier('Business', 2)">
-                        <div>
-                            <span class="tier-badge business">Premium</span>
-                            <div class="tier-name">Business</div>
-                            <div class="tier-multiplier-text">2.0x Base Rate</div>
+                    <div class="tier-cards-container">
+                        <!-- Economy -->
+                        <div class="tier-card selected" id="tierCardEconomy" onclick="selectClassTier('Economy', 1)">
+                            <div>
+                                <span class="tier-badge economy">Standard</span>
+                                <div class="tier-name">Economy</div>
+                                <div class="tier-multiplier-text">1.0x Base Rate</div>
+                            </div>
+                            <ul class="tier-features">
+                                <li>23kg Check-in Bag</li>
+                                <li>Standard Meal</li>
+                                <li>Rows 6-10</li>
+                            </ul>
                         </div>
-                        <ul class="tier-features">
-                            <li>Priority Boarding</li>
-                            <li>Airport Lounge Access</li>
-                            <li>Extra Recline Seats</li>
-                        </ul>
+
+                        <!-- Business -->
+                        <div class="tier-card" id="tierCardBusiness" onclick="selectClassTier('Business', 2)">
+                            <div>
+                                <span class="tier-badge business">Executive</span>
+                                <div class="tier-name">Business</div>
+                                <div class="tier-multiplier-text">2.0x Base Rate</div>
+                            </div>
+                            <ul class="tier-features">
+                                <li>Priority Boarding</li>
+                                <li>Lounge Access</li>
+                                <li>Rows 3-4 (2-2)</li>
+                            </ul>
+                        </div>
+
+                        <!-- First Class -->
+                        <div class="tier-card" id="tierCardFirst" onclick="selectClassTier('First Class', 3)">
+                            <div>
+                                <span class="tier-badge first">Luxury VIP</span>
+                                <div class="tier-name">First Class</div>
+                                <div class="tier-multiplier-text">3.0x Base Rate</div>
+                            </div>
+                            <ul class="tier-features">
+                                <li>Private Lie-Flat Pod</li>
+                                <li>Caviar & Fine Wine</li>
+                                <li>Rows 1-2 Suites</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <!-- First Class -->
-                    <div class="tier-card" id="tierCardFirst" onclick="selectClassTier('First Class', 3)">
-                        <div>
-                            <span class="tier-badge first">Luxury VIP</span>
-                            <div class="tier-name">First Class</div>
-                            <div class="tier-multiplier-text">3.0x Base Rate</div>
+                    <!-- 2D Aircraft Cabin Fuselage Seat Map -->
+                    <div class="class-tiers-label" style="margin-top: 20px;">
+                        <span>2. Interactive Seat Selection (Tap to Pick):</span>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--primary-light);">Selected: <strong id="currentSeatBadgeText">14A</strong></span>
+                    </div>
+
+                    <div class="cabin-fuselage-wrapper">
+                        <!-- Nose & Cockpit Dome -->
+                        <div class="fuselage-nose-dome">
+                            <div class="cockpit-windshield">
+                                <div class="cockpit-window"></div>
+                                <div class="cockpit-window"></div>
+                            </div>
                         </div>
-                        <ul class="tier-features">
-                            <li>Private Lie-flat Suite</li>
-                            <li>Fine Dining & Champagne</li>
-                            <li>Dedicated Chauffeur</li>
-                        </ul>
+
+                        <div class="cabin-rows-container">
+                            <!-- First Class Suites (1-1) -->
+                            <div class="cabin-section-header first">
+                                <span>Crown Suite Pods (Rows 1-2)</span>
+                                <span>1-1 Layout</span>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">1</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit suite" onclick="pickSeat('1A', 'First Class')" id="seat_1A" title="Seat 1A (Window Suite)">
+                                        <span class="seat-code">1A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">AISLE</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit suite" onclick="pickSeat('1F', 'First Class')" id="seat_1F" title="Seat 1F (Window Suite)">
+                                        <span class="seat-code">1F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">2</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit suite" onclick="pickSeat('2A', 'First Class')" id="seat_2A" title="Seat 2A (Window Suite)">
+                                        <span class="seat-code">2A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">AISLE</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit suite occupied" title="Seat 2F (Occupied by VIP)">
+                                        <span class="seat-code">2F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Business Class (2-2) -->
+                            <div class="cabin-section-header">
+                                <span>Business Class (Rows 3-4)</span>
+                                <span>2-2 Layout</span>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">3</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('3A', 'Business')" id="seat_3A" title="Seat 3A (Window)">
+                                        <span class="seat-code">3A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit occupied" title="Seat 3C (Occupied)">
+                                        <span class="seat-code">3C</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">AISLE</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('3D', 'Business')" id="seat_3D" title="Seat 3D (Aisle)">
+                                        <span class="seat-code">3D</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('3F', 'Business')" id="seat_3F" title="Seat 3F (Window)">
+                                        <span class="seat-code">3F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">4</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('4A', 'Business')" id="seat_4A" title="Seat 4A (Window)">
+                                        <span class="seat-code">4A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('4C', 'Business')" id="seat_4C" title="Seat 4C (Aisle)">
+                                        <span class="seat-code">4C</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">AISLE</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('4D', 'Business')" id="seat_4D" title="Seat 4D (Aisle)">
+                                        <span class="seat-code">4D</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('4F', 'Business')" id="seat_4F" title="Seat 4F (Window)">
+                                        <span class="seat-code">4F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Overwing Emergency Exit (Extra Legroom) -->
+                            <div class="cabin-section-header exit">
+                                <span>Emergency Exit (Row 5) • Extra Legroom</span>
+                                <span>3-3</span>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">5</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('5A', 'Economy', 20)" id="seat_5A" title="Seat 5A (Exit Row +$20)">
+                                        <span class="seat-code">5A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('5B', 'Economy', 20)" id="seat_5B" title="Seat 5B (Exit Row +$20)">
+                                        <span class="seat-code">5B</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('5C', 'Economy', 20)" id="seat_5C" title="Seat 5C (Exit Row +$20)">
+                                        <span class="seat-code">5C</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">EXIT</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('5D', 'Economy', 20)" id="seat_5D" title="Seat 5D (Exit Row +$20)">
+                                        <span class="seat-code">5D</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit occupied" title="Seat 5E (Occupied)">
+                                        <span class="seat-code">5E</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('5F', 'Economy', 20)" id="seat_5F" title="Seat 5F (Exit Row +$20)">
+                                        <span class="seat-code">5F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Economy Main Cabin (3-3) -->
+                            <div class="cabin-section-header">
+                                <span>Main Cabin (Rows 6-8)</span>
+                                <span>3-3</span>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">6</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('6A', 'Economy')" id="seat_6A" title="Seat 6A (Window)">
+                                        <span class="seat-code">6A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('6B', 'Economy')" id="seat_6B" title="Seat 6B (Middle)">
+                                        <span class="seat-code">6B</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('6C', 'Economy')" id="seat_6C" title="Seat 6C (Aisle)">
+                                        <span class="seat-code">6C</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">AISLE</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('6D', 'Economy')" id="seat_6D" title="Seat 6D (Aisle)">
+                                        <span class="seat-code">6D</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('6E', 'Economy')" id="seat_6E" title="Seat 6E (Middle)">
+                                        <span class="seat-code">6E</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('6F', 'Economy')" id="seat_6F" title="Seat 6F (Window)">
+                                        <span class="seat-code">6F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cabin-row-grid">
+                                <span class="row-label-pill">7</span>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('7A', 'Economy')" id="seat_7A" title="Seat 7A (Window)">
+                                        <span class="seat-code">7A</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit occupied" title="Seat 7B (Occupied)">
+                                        <span class="seat-code">7B</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('7C', 'Economy')" id="seat_7C" title="Seat 7C (Aisle)">
+                                        <span class="seat-code">7C</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                                <div class="cabin-aisle-divider">AISLE</div>
+                                <div class="cabin-seat-cluster">
+                                    <div class="cabin-seat-unit" onclick="pickSeat('7D', 'Economy')" id="seat_7D" title="Seat 7D (Aisle)">
+                                        <span class="seat-code">7D</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('7E', 'Economy')" id="seat_7E" title="Seat 7E (Middle)">
+                                        <span class="seat-code">7E</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                    <div class="cabin-seat-unit" onclick="pickSeat('7F', 'Economy')" id="seat_7F" title="Seat 7F (Window)">
+                                        <span class="seat-code">7F</span>
+                                        <span class="seat-type-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seat Legend -->
+                        <div class="cabin-seat-legend">
+                            <div class="legend-item"><span class="legend-swatch available"></span> Available</div>
+                            <div class="legend-item"><span class="legend-swatch selected"></span> Selected</div>
+                            <div class="legend-item"><span class="legend-swatch occupied"></span> Occupied</div>
+                            <div class="legend-item"><span class="legend-swatch suite"></span> Suite Pod</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Live Fare Calculation -->
-                <div class="modal-breakdown-box">
+                <!-- STEP 2: IN-FLIGHT EXTRAS & DINING -->
+                <div id="modalStep2Content" style="display: none;">
+                    <div class="class-tiers-label">
+                        <span>Personalize Your Flight Experience:</span>
+                        <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Toggle optional airline amenities</span>
+                    </div>
+
+                    <div class="addons-container">
+                        <!-- Addon 1: Extra Baggage -->
+                        <div class="addon-card" id="addonBaggageCard" onclick="toggleAddon('baggage', 45)">
+                            <div class="addon-left">
+                                <div class="addon-icon-circle">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="7" width="12" height="14" rx="2"></rect><path d="M9 7V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3"></path><line x1="9" y1="21" x2="9" y2="23"></line><line x1="15" y1="21" x2="15" y2="23"></line></svg>
+                                </div>
+                                <div class="addon-details">
+                                    <h4>+1 Extra Checked Bag (23kg)</h4>
+                                    <p>Standard 23kg allowance included; add another checked piece with priority tag.</p>
+                                </div>
+                            </div>
+                            <div class="addon-right">
+                                <span class="addon-price-badge" id="addonBaggagePrice">+$45.00</span>
+                                <div class="addon-checkbox">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Addon 2: Gourmet Dining -->
+                        <div class="addon-card" id="addonMealCard" onclick="toggleAddon('meal', 18)">
+                            <div class="addon-left">
+                                <div class="addon-icon-circle">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="6" x2="6" y2="2"></line><line x1="10" y1="6" x2="10" y2="2"></line><line x1="14" y1="6" x2="14" y2="2"></line></svg>
+                                </div>
+                                <div class="addon-details">
+                                    <h4>Chef's Gourmet Dining Upgrade</h4>
+                                    <p>Fresh Grilled Atlantic Salmon or Tenderloin Steak with fine dessert.</p>
+                                </div>
+                            </div>
+                            <div class="addon-right">
+                                <span class="addon-price-badge" id="addonMealPrice">+$18.00</span>
+                                <div class="addon-checkbox">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Addon 3: Satellite Wi-Fi -->
+                        <div class="addon-card" id="addonWifiCard" onclick="toggleAddon('wifi', 15)">
+                            <div class="addon-left">
+                                <div class="addon-icon-circle">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                                </div>
+                                <div class="addon-details">
+                                    <h4>High-Speed Satellite Wi-Fi Pass</h4>
+                                    <p>Unlimited high-speed in-flight internet streaming across all your devices.</p>
+                                </div>
+                            </div>
+                            <div class="addon-right">
+                                <span class="addon-price-badge" id="addonWifiPrice">+$15.00</span>
+                                <div class="addon-checkbox">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Addon 4: Travel Protection -->
+                        <div class="addon-card" id="addonInsuranceCard" onclick="toggleAddon('insurance', 28)">
+                            <div class="addon-left">
+                                <div class="addon-icon-circle">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                </div>
+                                <div class="addon-details">
+                                    <h4>SkyWings Comprehensive Protection</h4>
+                                    <p>100% cancellation reimbursement, emergency medical coverage, and lost bag shield.</p>
+                                </div>
+                            </div>
+                            <div class="addon-right">
+                                <span class="addon-price-badge" id="addonInsurancePrice">+$28.00</span>
+                                <div class="addon-checkbox">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Fare Calculation Breakdown Box -->
+                <div class="modal-breakdown-box" style="margin-top: 18px;">
                     <div class="breakdown-row">
                         <span>Base Airfare:</span>
                         <span id="calcBaseFare">$0.00</span>
                     </div>
                     <div class="breakdown-row">
-                        <span>Class Surcharge (<span id="calcClassLabel">Economy</span>):</span>
+                        <span>Cabin Tier (<span id="calcClassLabel">Economy</span>):</span>
                         <span id="calcClassSurcharge">$0.00</span>
+                    </div>
+                    <div class="breakdown-row" id="breakdownSeatRow" style="display: none;">
+                        <span>Exit Row Seat Fee (<span id="calcSeatName">5A</span>):</span>
+                        <span id="calcSeatSurcharge">+$20.00</span>
+                    </div>
+                    <div class="breakdown-row" id="breakdownExtrasRow" style="display: none;">
+                        <span>In-Flight Extras (<span id="calcExtrasList">Addons</span>):</span>
+                        <span id="calcExtrasSurcharge">+$0.00</span>
                     </div>
                     <div class="breakdown-row">
                         <span>Aviation Security & Taxes:</span>
-                        <span>$35.00</span>
+                        <span id="calcTaxesFare">$35.00</span>
                     </div>
                     <div class="breakdown-row total">
                         <span>Total Payable Amount:</span>
@@ -409,12 +791,12 @@
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" onclick="closeBookingModal()" style="flex: 0.4;">Cancel</button>
+                <!-- Modal Action Controls -->
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-outline" onclick="closeBookingModal()" style="flex: 0.35;">Cancel</button>
                     <button type="button" class="btn-confirm-booking" id="confirmBookingBtn" onclick="processFlightBooking()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                        <span>Reserve & Pay Now</span>
+                        <span>Confirm & Reserve Flight</span>
                     </button>
                 </div>
             </div>
@@ -422,7 +804,7 @@
     </div>
 
     <!-- =========================================================
-         REALISTIC BOARDING PASS MODAL
+         REALISTIC BOARDING PASS MODAL WITH SCANNER & COUNTDOWN
          ========================================================= -->
     <div id="boardingPassModal" class="modal-overlay">
         <div class="ticket-modal-card" id="ticketModalCard">
@@ -478,7 +860,21 @@
                     </div>
                     <div class="ticket-data-item">
                         <div class="t-label">Assigned Seat</div>
-                        <div class="t-val" style="color: var(--primary-light);" id="bpSeat">4F</div>
+                        <div class="t-val" style="color: var(--primary-light); font-weight: 900;" id="bpSeat">4F</div>
+                    </div>
+                </div>
+
+                <!-- Live Countdown & QR Strip -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px 0; flex-wrap: wrap; gap: 10px;">
+                    <div class="flight-countdown-pill">
+                        <span class="clock-icon">⏱️</span>
+                        <span id="bpCountdownText">Boarding in: 02d 14h 28m</span>
+                    </div>
+                    <div class="ticket-qr-strip" style="margin: 0; padding: 4px 10px;">
+                        <svg class="qr-code-svg-wrap" viewBox="0 0 24 24" fill="#0f172a" style="width: 44px; height: 44px;">
+                            <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm12 2h2v4h-2v-4zm4-2h2v2h-2v-2zm-6 0h2v2h-2v-2zm4 4h2v2h-2v-2zm-2-2h2v2h-2v-2zm-2 2h2v2h-2v-2z"/>
+                        </svg>
+                        <span style="font-size: 11px; font-weight: 800; color: #1e3a8a; margin-left: 8px;">IATA SECURE</span>
                     </div>
                 </div>
 
@@ -489,9 +885,11 @@
                     <div class="stamp-sub">SECURITY CHECKED</div>
                 </div>
 
+                <!-- Simulated Barcode with Glowing Laser Scanning Beam -->
                 <div class="ticket-barcode-strip">
+                    <div class="ticket-scanner-laser"></div>
                     <div class="barcode-simulation">|||||| | |||||||| |||| | |||||| |||||||| |</div>
-                    <div class="ticket-barcode-caption">ETKT-SKYWINGS-AUTH-VERIFIED</div>
+                    <div class="ticket-barcode-caption">ETKT-SKYWINGS-AUTH-VERIFIED • BOARDING PASS</div>
                 </div>
 
                 <div style="margin-top: 24px; display: flex; gap: 12px;">
