@@ -52,7 +52,8 @@ def resize_docx(input_docx, output_docx, target_size_bytes=10485760): # 10 MiB
         print("Verification Failed:", e)
 
 if __name__ == "__main__":
-    base_file = r"d:\Airline ticket booking system\SkyWings_Airline_Ticket_Booking_System_Project.docx"
+    base_file = r"d:\Airline ticket booking system\SkyWings_Airline_Documentation.docx"
     target_file = r"d:\Airline ticket booking system\SkyWings_Airline_Ticket_Booking_System_10MB.docx"
-    resize_docx(base_file, target_file, 10 * 1024 * 1024)
+    # Target 9.2 MB (9,646,899 bytes), strictly under 10,000,000 bytes (decimal 10MB) and 10,485,760 bytes (binary 10MiB)
+    resize_docx(base_file, target_file, 9200000)
 
