@@ -2466,8 +2466,14 @@ body {
 .modal-overlay.active {
     display: flex !important;
     justify-content: center;
-    align-items: flex-start; /* Ensures content is never cut off at top or bottom */
+    align-items: center;
     animation: fadeIn 0.25s ease-out;
+}
+
+@media (max-height: 720px) {
+    .modal-overlay.active {
+        align-items: flex-start;
+    }
 }
 
 .modal-container {

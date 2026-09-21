@@ -722,7 +722,7 @@ function renderBookingsTable() {
                 <td style="text-align: right;">
                     <div style="display: inline-flex; gap: 8px;">
                         <button type="button" class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" 
-                                onclick="openBoardingPassById('${bookingId}')">
+                                onclick="openBoardingPassById('${bookingId}', event)">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="6" cy="12" r="2"></circle><circle cx="18" cy="12" r="2"></circle></svg>
                             Boarding Pass
                         </button>
@@ -1054,8 +1054,16 @@ async function cancelUserBooking(bookingId) {
 // =========================================================
 // 10. REALISTIC BOARDING PASS & LASER SCANNER CONTROLLER
 // =========================================================
-function openBoardingPassById(bookingId) {
-    const booking = myBookings.find(b => String(b.BookingId || b.Id) === String(bookingId));
+function openBoardingPassById(bookingId, event) {
+    if (event && event.stopPropagation) {
+        event.stopPropagation();
+    }
+
+    let booking = myBookings.find(b => String(b.BookingId || b.Id || b.id) === String(bookingId));
+    if (!booking && myBookings.length > 0) {
+        booking = myBookings[0];
+    }
+
     if (!booking) {
         showToast('Boarding pass details not available.', 'error');
         return;
@@ -1070,6 +1078,7 @@ function openBoardingPassById(bookingId) {
     const fDest = document.getElementById('bpDestination');
     const fClass = document.getElementById('bpClass');
     const fDate = document.getElementById('bpDate');
+    const fGate = document.getElementById('bpGate');
     const fSeat = document.getElementById('bpSeat');
 
     if (pName) pName.innerText = activeUser?.username || 'Passenger';
@@ -1077,6 +1086,7 @@ function openBoardingPassById(bookingId) {
     if (fOrig) fOrig.innerText = booking.Origin || 'Origin';
     if (fDest) fDest.innerText = booking.Destination || 'Destination';
     if (fClass) fClass.innerText = booking.FlightClass || 'Economy';
+    if (fGate) fGate.innerText = booking.Gate || 'B22';
     if (fDate) {
         try {
             fDate.innerText = booking.DepartureTime ? new Date(booking.DepartureTime).toLocaleString([], {
@@ -1095,8 +1105,12 @@ function openBoardingPassById(bookingId) {
     if (ticketBody) ticketBody.scrollTop = 0;
     modal.scrollTop = 0;
 
-    // Play Authentic In-Flight Boarding Chime
-    playCabinChime();
+    // Play Authentic In-Flight Boarding Chime safely
+    try {
+        playCabinChime();
+    } catch (e) {
+        console.warn('Cabin chime playback failed:', e);
+    }
 
     // Trigger Customs Stamp Animation
     const card = document.getElementById('ticketModalCard');
