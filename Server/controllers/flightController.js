@@ -1,4 +1,5 @@
 const { poolPromise } = require('../config/db');
+const sql = require('mssql/msnodesqlv8');
 
 exports.getFlights = async (req, res) => {
     try {
@@ -17,18 +18,24 @@ exports.createFlight = async (req, res) => {
         if (!flightNumber || !origin || !destination || !departureTime || !price) {
             return res.status(400).json({ error: 'All fields required' });
         }
+
+        const parsedDate = new Date(departureTime);
+        if (isNaN(parsedDate.getTime())) {
+            return res.status(400).json({ error: 'Invalid departure date/time format' });
+        }
+
         const pool = await poolPromise;
         await pool.request()
             .input('FlightNumber', flightNumber)
             .input('Origin', origin)
             .input('Destination', destination)
-            .input('DepartureTime', departureTime)
-            .input('Price', price)
+            .input('DepartureTime', sql.DateTime, parsedDate)
+            .input('Price', parseFloat(price))
             .query('INSERT INTO Flights (FlightNumber, Origin, Destination, DepartureTime, Price) VALUES (@FlightNumber, @Origin, @Destination, @DepartureTime, @Price)');
             
         res.status(201).json({ message: 'Flight added successfully!' });
     } catch (err) {
-        console.error(err);
+        console.error('Error adding flight:', err);
         res.status(500).json({ error: 'Server error adding flight' });
     }
 };
