@@ -2,7 +2,7 @@ const { poolPromise } = require('../config/db');
 
 exports.bookFlight = async (req, res) => {
     try {
-        const { userId, flightId, flightClass, totalPrice } = req.body;
+        const { userId, flightId, flightClass, totalPrice, seatNumber } = req.body;
         if (!userId || !flightId) return res.status(400).json({ error: 'UserId and FlightId required' });
 
         const pool = await poolPromise;
@@ -11,7 +11,8 @@ exports.bookFlight = async (req, res) => {
             .input('FlightId', flightId)
             .input('FlightClass', flightClass || 'Economy')
             .input('TotalPrice', totalPrice || 0)
-            .query('INSERT INTO Bookings (UserId, FlightId, FlightClass, TotalPrice) VALUES (@UserId, @FlightId, @FlightClass, @TotalPrice)');
+            .input('SeatNumber', seatNumber || '14A')
+            .query('INSERT INTO Bookings (UserId, FlightId, FlightClass, TotalPrice, SeatNumber) VALUES (@UserId, @FlightId, @FlightClass, @TotalPrice, @SeatNumber)');
             
         res.status(201).json({ message: 'Flight booked successfully!' });
     } catch (err) {
@@ -28,7 +29,7 @@ exports.getUserBookings = async (req, res) => {
             .input('UserId', userId)
             .query(`
                 SELECT b.Id AS BookingId, f.FlightNumber, f.Origin, f.Destination, f.DepartureTime, f.Price AS BasePrice, 
-                       b.FlightClass, b.TotalPrice, b.BookingDate, b.Status
+                       b.FlightClass, b.TotalPrice, b.SeatNumber, b.BookingDate, b.Status
                 FROM Bookings b
                 JOIN Flights f ON b.FlightId = f.Id
                 WHERE b.UserId = @UserId
@@ -46,7 +47,7 @@ exports.getAllBookings = async (req, res) => {
         const pool = await poolPromise;
         const result = await pool.request().query(`
             SELECT b.Id AS BookingId, u.Username, u.Email, f.FlightNumber, f.Origin, f.Destination, f.DepartureTime, 
-                   b.FlightClass, b.TotalPrice, b.BookingDate, b.Status
+                   b.FlightClass, b.TotalPrice, b.SeatNumber, b.BookingDate, b.Status
             FROM Bookings b
             JOIN Flights f ON b.FlightId = f.Id
             JOIN Users u ON b.UserId = u.Id

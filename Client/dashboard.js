@@ -687,6 +687,7 @@ function renderBookingsTable() {
                 </td>
                 <td>
                     <span class="class-pill ${classPillType}">${flightClass}</span>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--primary-light); margin-top: 4px;">💺 Seat: ${b.SeatNumber || '14A'}</div>
                 </td>
                 <td>
                     <strong style="color: var(--primary); font-family: 'Space Grotesk', sans-serif;">
@@ -961,7 +962,8 @@ async function processFlightBooking() {
                 userId: userId,
                 flightId: flightId,
                 flightClass: currentTierName,
-                totalPrice: grandTotalFare
+                totalPrice: grandTotalFare,
+                seatNumber: currentAssignedSeat || '6A'
             })
         });
 
@@ -1055,7 +1057,7 @@ function openBoardingPassById(bookingId) {
             dateStyle: 'medium', timeStyle: 'short'
         });
     }
-    if (fSeat) fSeat.innerText = currentAssignedSeat || '6A';
+    if (fSeat) fSeat.innerText = booking.SeatNumber || currentAssignedSeat || '6A';
 
     modal.classList.add('active');
 

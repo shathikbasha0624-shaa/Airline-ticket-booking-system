@@ -436,7 +436,10 @@ function renderAdminBookingsTable(bookings) {
                 <td><code>${b.Email}</code></td>
                 <td><span class="airline-code-badge" style="font-size: 11px;">${b.FlightNumber}</span></td>
                 <td>${b.Origin} ➔ ${b.Destination}</td>
-                <td><span class="class-pill ${classPill}">${fClass}</span></td>
+                <td>
+                    <span class="class-pill ${classPill}">${fClass}</span>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--primary-light); margin-top: 4px;">💺 Seat: ${b.SeatNumber || '14A'}</div>
+                </td>
                 <td><strong style="color: var(--success); font-family: 'Space Grotesk', sans-serif;">${formatPrice(priceUSD)}</strong></td>
                 <td><span class="status-pill ${statusClass}">● ${b.Status || 'Confirmed'}</span></td>
                 <td style="text-align: right;">
