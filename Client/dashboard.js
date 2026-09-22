@@ -1081,12 +1081,29 @@ function openBoardingPassById(bookingId, event) {
     const fGate = document.getElementById('bpGate');
     const fSeat = document.getElementById('bpSeat');
 
+    const originData = parseAirport(booking.Origin);
+    const destData = parseAirport(booking.Destination);
+    const oCodeEl = document.getElementById('bpOriginCode');
+    const dCodeEl = document.getElementById('bpDestCode');
+    const fBadgeEl = document.getElementById('bpFlightNumberBadge');
+    const stubFlightSeatEl = document.getElementById('bpStubFlightSeat');
+    const stubSerialEl = document.getElementById('bpStubSerial');
+
+    const seatDisplay = booking.SeatNumber || currentAssignedSeat || '14A';
+    const flightNum = booking.FlightNumber || 'SW-101';
+    const bIdDisplay = booking.BookingId || booking.Id || '101';
+
     if (pName) pName.innerText = activeUser?.username || 'Passenger';
-    if (fNum) fNum.innerText = booking.FlightNumber || 'SW-101';
-    if (fOrig) fOrig.innerText = booking.Origin || 'Origin';
-    if (fDest) fDest.innerText = booking.Destination || 'Destination';
+    if (fNum) fNum.innerText = flightNum;
+    if (fBadgeEl) fBadgeEl.innerText = flightNum;
+    if (fOrig) fOrig.innerText = originData.city || booking.Origin || 'Origin';
+    if (fDest) fDest.innerText = destData.city || booking.Destination || 'Destination';
+    if (oCodeEl) oCodeEl.innerText = originData.code || 'DEP';
+    if (dCodeEl) dCodeEl.innerText = destData.code || 'ARR';
     if (fClass) fClass.innerText = booking.FlightClass || 'Economy';
     if (fGate) fGate.innerText = booking.Gate || 'B22';
+    if (stubFlightSeatEl) stubFlightSeatEl.innerText = `${flightNum} • ${seatDisplay}`;
+    if (stubSerialEl) stubSerialEl.innerText = `#BK-${bIdDisplay}`;
     if (fDate) {
         try {
             fDate.innerText = booking.DepartureTime ? new Date(booking.DepartureTime).toLocaleString([], {
@@ -1096,7 +1113,7 @@ function openBoardingPassById(bookingId, event) {
             fDate.innerText = 'Scheduled Today';
         }
     }
-    if (fSeat) fSeat.innerText = booking.SeatNumber || currentAssignedSeat || '14A';
+    if (fSeat) fSeat.innerText = seatDisplay;
 
     modal.classList.add('active');
 
